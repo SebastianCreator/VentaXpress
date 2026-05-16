@@ -1,0 +1,95 @@
+.sales h1 {
+  font-size: 28px;
+  color: var(--dark-gray);
+  margin-bottom: 30px;
+}
+
+.sales-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.sales-form, .sales-items, .sales-checkout {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sales-form h2, .sales-items h2, .sales-checkout h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: var(--dark-gray);
+  border-bottom: 2px solid var(--primary-red);
+  padding-bottom: 10px;
+}
+
+.sales-form select, .sales-form input, .sales-checkout select, .sales-checkout input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.btn-add {
+  width: 100%;
+  background-color: var(--primary-red);
+  color: white;
+  margin-top: 10px;
+}
+
+.sales-items table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.sales-items thead {
+  background-color: var(--primary-red);
+  color: white;
+}
+
+.sales-items td, .sales-items th {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.sales-items button {
+  background-color: #e74c3c;
+  color: white;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.sales-checkout p {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.sales-checkout p strong {
+  color: var(--primary-red);
+  font-weight: 700;
+}
+
+.sales-checkout .total {
+  font-size: 18px;
+  border-top: 2px solid var(--secondary-orange);
+  padding-top: 12px;
+  margin-top: 15px;
+}
+
+.btn-sale {
+  width: 100%;
+  background-color: var(--secondary-orange);
+  color: white;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+@media (max-width: 1200px) {
+  .sales-container {
+    grid-template-columns: 1fr;
+  }
+}

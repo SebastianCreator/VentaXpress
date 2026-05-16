@@ -1,0 +1,115 @@
+:root {
+  --primary-red: #E74C3C;
+  --secondary-orange: #F39C12;
+  --light-gray: #ECF0F1;
+  --dark-gray: #2C3E50;
+  --success: #27AE60;
+  --warning: #E67E22;
+  --danger: #E74C3C;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light-gray);
+  color: var(--dark-gray);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+input, select, textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-red);
+  box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+  background-color: var(--primary-red);
+  color: white;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+.btn-add, .btn-filter {
+  background-color: var(--primary-red);
+  color: white;
+}
+
+.btn-add:hover, .btn-filter:hover {
+  background-color: #c0392b;
+}
+
+.btn-pdf, .btn-sale {
+  background-color: var(--secondary-orange);
+  color: white;
+}
+
+.btn-pdf:hover, .btn-sale:hover {
+  background-color: #d68910;
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.low-stock {
+  background-color: #ffe6e6 !important;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.alert {
+  border-left: 4px solid var(--danger);
+}
