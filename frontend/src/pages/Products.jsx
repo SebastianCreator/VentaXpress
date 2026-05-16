@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import '../styles/products.css'
+import '../styles/modal.css'
+
 
 function Products() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -15,6 +17,13 @@ function Products() {
   const [scanError, setScanError] = useState('')
   const [productsError, setProductsError] = useState('')
   const token = localStorage.getItem('token')
+
+  // Modal create/edit
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState('create') // 'create' | 'edit'
+  const [editingId, setEditingId] = useState(null)
+  const [modalSubmitting, setModalSubmitting] = useState(false)
+
 
 
   const decodeJwtRole = (jwt) => {
@@ -83,24 +92,77 @@ function Products() {
     }
   }
 
-  const handleAddProduct = async (e) => {
+  const openCreateModal = () => {
+    setModalMode('create')
+    setEditingId(null)
+    setModalSubmitting(false)
+    setFormData({ code: '', barcode: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0 })
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (product) => {
+    setModalMode('edit')
+    setEditingId(product._id)
+    setModalSubmitting(false)
+    setFormData({
+      code: product.code || '',
+      barcode: product.barcode || '',
+      name: product.name || '',
+      category: product.category || '',
+      price: product.price ?? 0,
+      cost: product.cost ?? 0,
+      stock: product.stock ?? 0,
+      minStock: product.minStock ?? 5,
+      tax: product.tax ?? 0
+    })
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    if (modalSubmitting) return
+    setIsModalOpen(false)
+    setEditingId(null)
+    setModalMode('create')
+  }
+
+  const submitModal = async (e) => {
     e.preventDefault()
-    // Validación visual se hace con jwtRole; validación real la hace el backend (admin).
+
     if (jwtRole !== 'admin') {
-      alert('Solo administradores pueden agregar productos')
+      alert('Solo administradores pueden modificar productos')
       return
     }
 
     try {
-      await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authorization: `Bearer ${token}` } })
+      setModalSubmitting(true)
 
+      if (modalMode === 'create') {
+        await axios.post(`${API_BASE_URL}/api/products`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      } else {
+        await axios.put(`${API_BASE_URL}/api/products/${editingId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      }
+
+      setIsModalOpen(false)
+      setEditingId(null)
+      setModalMode('create')
       setFormData({ code: '', barcode: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0 })
-      setShowForm(false)
       fetchProducts()
     } catch (error) {
-      alert('Error al agregar producto: ' + error.message)
+      alert(`${modalMode === 'create' ? 'Error al agregar producto' : 'Error al editar producto'}: ` + (error?.message || error))
+    } finally {
+      setModalSubmitting(false)
     }
   }
+
+  const handleAddProduct = async (e) => {
+    // Mantener por compatibilidad: ahora crea/edita desde modal.
+    return submitModal(e)
+  }
+
 
   return (
     <div className="products">
@@ -128,68 +190,144 @@ function Products() {
       </div>
 
 
-      {jwtRole === 'admin' && (
-        <button onClick={() => setShowForm(!showForm)} className="btn-add">
+      {productsError && <p className="products-error">{productsError}</p>}
 
-          {showForm ? 'Cancelar' : 'Nuevo Producto'}
+      {jwtRole === 'admin' && (
+        <button onClick={openCreateModal} className="btn-add">
+          Nuevo Producto
         </button>
       )}
 
-      {productsError && <p className="products-error">{productsError}</p>}
+      {isModalOpen && (
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeModal()
+          }}
+        >
+          <div className="modal-card">
+            <div className="modal-header">
+              <div className="modal-title">
+                {modalMode === 'create' ? 'Crear Producto' : 'Editar Producto'}
+              </div>
+              <button className="modal-close" type="button" onClick={closeModal}>
+                ✕
+              </button>
+            </div>
 
-      {showForm && (
+            <div className="modal-body">
+              <form onSubmit={submitModal} className="modal-form">
+                <div className="field">
+                  <label>Código</label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    required
+                    disabled={modalMode === 'edit' && !!editingId}
+                  />
+                </div>
 
-        <form onSubmit={handleAddProduct} className="product-form">
-          <input
-            type="text"
-            placeholder="Código"
-            value={formData.code}
-            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Nombre"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Categoría"
-            value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Barcode"
-            value={formData.barcode}
-            onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Precio"
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-            required
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Costo"
-            value={formData.cost}
-            onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
-          />
-          <input
-            type="number"
-            placeholder="Stock"
-            value={formData.stock}
-            onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
-          />
-          <button type="submit">Guardar Producto</button>
-        </form>
+                <div className="field">
+                  <label>Nombre</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Categoría</label>
+                  <input
+                    type="text"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Barcode</label>
+                  <input
+                    type="text"
+                    value={formData.barcode}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Precio</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Costo</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.cost}
+                    onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Stock</label>
+                  <input
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Min Stock</label>
+                  <input
+                    type="number"
+                    value={formData.minStock}
+                    onChange={(e) => setFormData({ ...formData, minStock: parseInt(e.target.value) })}
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Impuesto (%)</label>
+                  <input
+                    type="number"
+                    value={formData.tax}
+                    onChange={(e) => setFormData({ ...formData, tax: parseFloat(e.target.value) })}
+                  />
+                </div>
+
+                <div className="field" style={{ gridColumn: '1 / -1' }}>
+                  <label>Activo</label>
+                  <select
+                    value={formData.isActive ?? true}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                  >
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                  </select>
+                </div>
+
+                <div className="modal-actions">
+                  <button type="button" className="modal-btn secondary" onClick={closeModal} disabled={modalSubmitting}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="modal-btn primary" disabled={modalSubmitting}>
+                    {modalSubmitting ? 'Guardando...' : (modalMode === 'create' ? 'Crear' : 'Guardar Cambios')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
 
       <table className="products-table">
@@ -201,6 +339,7 @@ function Products() {
             <th>Precio</th>
             <th>Stock</th>
             <th>Estado</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -212,6 +351,17 @@ function Products() {
               <td>${product.price}</td>
               <td>{product.stock}</td>
               <td>{product.stock <= product.minStock ? '⚠️ Bajo' : '✓'}</td>
+              <td>
+                {jwtRole === 'admin' && (
+                  <button
+                    className="btn-edit"
+                    type="button"
+                    onClick={() => openEditModal(product)}
+                  >
+                    Editar
+                  </button>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>

@@ -1,0 +1,130 @@
+/* Modal genérico para edición/creación */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 820px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: modalIn 140ms ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  background: linear-gradient(90deg, var(--primary-red), var(--secondary-orange));
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-title {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.modal-close {
+  border: 0;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 40px;
+}
+
+.modal-body {
+  padding: 18px 20px;
+}
+
+.modal-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.modal-form label {
+  font-size: 12px;
+  color: #5b5b5b;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.modal-form .field {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-form input, 
+.modal-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  outline: none;
+  background: #fff;
+}
+
+.modal-form input:focus, 
+.modal-form select:focus {
+  border-color: rgba(240, 53, 69, 0.35);
+  box-shadow: 0 0 0 4px rgba(240, 53, 69, 0.12);
+}
+
+.modal-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-btn {
+  border: 0;
+  padding: 11px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.modal-btn.secondary {
+  background: #f2f2f2;
+  color: #333;
+}
+
+.modal-btn.primary {
+  background: var(--secondary-orange);
+  color: #fff;
+}
+
+.modal-btn.danger {
+  background: #ff4d4d;
+  color: #fff;
+}
+

@@ -71,3 +71,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+.btn-edit {
+  background: #f59e0b;
+  border: 0;
+  color: #111;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  filter: brightness(0.95);
+}
+
