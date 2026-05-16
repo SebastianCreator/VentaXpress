@@ -7,8 +7,12 @@ function Products() {
   const [products, setProducts] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
-    code: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0
+    code: '', barcode: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0
   })
+
+  const [scanValue, setScanValue] = useState('')
+  const [foundProduct, setFoundProduct] = useState(null)
+  const [scanError, setScanError] = useState('')
   const token = localStorage.getItem('token')
   const userRole = localStorage.getItem('role') || 'cajero'
 
@@ -25,6 +29,30 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
     }
   }
 
+  const lookupByScan = async (value) => {
+    const trimmed = (value || '').trim()
+    if (!trimmed) return null
+
+    const response = await axios.get(`${API_BASE_URL}/api/products/lookup`, {
+      params: { value: trimmed }
+    })
+    return response.data
+  }
+
+  const handleScanLookup = async (e) => {
+    if (e?.preventDefault) e.preventDefault()
+    try {
+      setScanError('')
+      setFoundProduct(null)
+
+      const product = await lookupByScan(scanValue)
+      setFoundProduct(product)
+    } catch (error) {
+      setScanError(error?.response?.data?.message || 'Producto no encontrado')
+      setFoundProduct(null)
+    }
+  }
+
   const handleAddProduct = async (e) => {
     e.preventDefault()
     if (userRole !== 'admin') {
@@ -33,8 +61,8 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
     }
 
     try {
-await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authorization: `Bearer ${token}` } })
-      setFormData({ code: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0 })
+      await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authorization: `Bearer ${token}` } })
+      setFormData({ code: '', barcode: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0 })
       setShowForm(false)
       fetchProducts()
     } catch (error) {
@@ -45,6 +73,27 @@ await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authoriz
   return (
     <div className="products">
       <h1>Gestión de Productos</h1>
+
+      <div className="scan-lookup">
+        <h2>Escanear / Buscar</h2>
+        <form onSubmit={handleScanLookup}>
+          <input
+            type="text"
+            value={scanValue}
+            onChange={(e) => setScanValue(e.target.value)}
+            placeholder="Escanea barcode o código y presiona Enter"
+            autoComplete="off"
+          />
+          <button type="submit" className="btn-add">Buscar</button>
+        </form>
+        {scanError && <p className="scan-error">{scanError}</p>}
+        {foundProduct && (
+          <div className="scan-result">
+            <p><strong>Encontrado:</strong> {foundProduct.name} (Código: {foundProduct.code})</p>
+            <p>Precio: ${foundProduct.price} | Stock: {foundProduct.stock}</p>
+          </div>
+        )}
+      </div>
 
       {userRole === 'admin' && (
         <button onClick={() => setShowForm(!showForm)} className="btn-add">
@@ -74,6 +123,12 @@ await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authoriz
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             required
+          />
+          <input
+            type="text"
+            placeholder="Barcode"
+            value={formData.barcode}
+            onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
           />
           <input
             type="number"

@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
   try {
     const { category, search } = req.query;
     const filter = { isActive: true };
-    
+
     if (category) filter.category = category;
     if (search) filter.$or = [
       { name: new RegExp(search, 'i') },
@@ -17,6 +17,27 @@ router.get('/', async (req, res) => {
 
     const products = await Product.find(filter);
     res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Lookup para escáner de barcode/código
+// GET /api/products/lookup?value=...
+router.get('/lookup', async (req, res) => {
+  try {
+    const value = (req.query.value || '').trim();
+    if (!value) return res.status(400).json({ message: 'Valor requerido' });
+
+    // Primero por barcode exacto
+    let product = await Product.findOne({ isActive: true, barcode: value });
+
+    // Si no existe, buscar por code exacto
+    if (!product) product = await Product.findOne({ isActive: true, code: value });
+
+    if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
+
+    res.json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

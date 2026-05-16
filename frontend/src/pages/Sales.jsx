@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios'
 import '../styles/sales.css'
 
@@ -12,17 +12,53 @@ function Sales() {
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const token = localStorage.getItem('token')
 
+  const [scanValue, setScanValue] = useState('')
+  const scanInputRef = useRef(null)
+
   useEffect(() => {
     fetchProducts()
+    // foco para que el escáner funcione sin clics
+    scanInputRef.current?.focus()
   }, [])
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${token}` } })
+      const response = await axios.get(`${API_BASE_URL}/api/products`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setProducts(response.data)
     } catch (error) {
       console.error('Error fetching products:', error)
     }
+  }
+
+  const upsertItem = (product, qty = 1) => {
+    if (!product || qty <= 0) return
+
+    setItems(prev => {
+      const existingIdx = prev.findIndex(i => i.product === product._id)
+      if (existingIdx >= 0) {
+        const next = [...prev]
+        const updatedQty = next[existingIdx].quantity + qty
+        next[existingIdx] = {
+          ...next[existingIdx],
+          quantity: updatedQty,
+          subtotal: product.price * updatedQty
+        }
+        return next
+      }
+
+      return [
+        ...prev,
+        {
+          product: product._id,
+          name: product.name,
+          quantity: qty,
+          unitPrice: product.price,
+          subtotal: product.price * qty
+        }
+      ]
+    })
   }
 
   const addItem = () => {
@@ -31,15 +67,7 @@ function Sales() {
     const product = products.find(p => p._id === selectedProduct)
     if (!product) return
 
-    const newItem = {
-      product: product._id,
-      name: product.name,
-      quantity: parseInt(quantity),
-      unitPrice: product.price,
-      subtotal: product.price * quantity
-    }
-
-    setItems([...items, newItem])
+    upsertItem(product, parseInt(quantity))
     setSelectedProduct('')
     setQuantity(1)
   }
@@ -53,7 +81,38 @@ function Sales() {
     const tax = subtotal * 0.16
     const total = subtotal + tax - discount
 
-    return { subtotal: subtotal.toFixed(2), tax: tax.toFixed(2), total: total.toFixed(2) }
+    return {
+      subtotal: subtotal.toFixed(2),
+      tax: tax.toFixed(2),
+      total: total.toFixed(2)
+    }
+  }
+
+  const lookupByScan = async (value) => {
+    const trimmed = (value || '').trim()
+    if (!trimmed) return null
+
+    const response = await axios.get(`${API_BASE_URL}/api/products/lookup`, {
+      params: { value: trimmed }
+    })
+    return response.data
+  }
+
+  const handleScan = async () => {
+    try {
+      const value = scanValue.trim()
+      if (!value) return
+
+      const product = await lookupByScan(value)
+      upsertItem(product, 1)
+
+      setScanValue('')
+      scanInputRef.current?.focus()
+    } catch (error) {
+      alert(error?.response?.data?.message || 'Producto no encontrado')
+      setScanValue('')
+      scanInputRef.current?.focus()
+    }
   }
 
   const handleSale = async () => {
@@ -72,19 +131,27 @@ function Sales() {
         paymentMethod
       }
 
-      const response = await axios.post(`${API_BASE_URL}/api/sales`, saleData, {
+      await axios.post(`${API_BASE_URL}/api/sales`, saleData, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
       alert('¡Venta completada!')
       setItems([])
       setDiscount(0)
+      setSelectedProduct('')
+      setQuantity(1)
+      setScanValue('')
+      scanInputRef.current?.focus()
     } catch (error) {
       alert('Error al procesar la venta: ' + error.message)
     }
   }
 
   const totals = calculateTotals()
+
+  const scanHint = useMemo(() => {
+    return 'Escanea barcode o ingresa código y presiona Enter'
+  }, [])
 
   return (
     <div className="sales">
@@ -93,7 +160,23 @@ function Sales() {
       <div className="sales-container">
         <div className="sales-form">
           <h2>Agregar Productos</h2>
-          
+
+          <input
+            ref={scanInputRef}
+            type="text"
+            value={scanValue}
+            onChange={(e) => setScanValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                handleScan()
+              }
+            }}
+            placeholder={scanHint}
+            className="scan-input"
+            autoComplete="off"
+          />
+
           <select value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)}>
             <option value="">Seleccionar producto...</option>
             {products.map(p => (
@@ -142,7 +225,7 @@ function Sales() {
           <h2>Resumen</h2>
           <p>Subtotal: <strong>${totals.subtotal}</strong></p>
           <p>Impuesto (16%): <strong>${totals.tax}</strong></p>
-          
+
           <input
             type="number"
             value={discount}
@@ -150,7 +233,7 @@ function Sales() {
             placeholder="Descuento"
             min="0"
           />
-          
+
           <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
             <option value="cash">Efectivo</option>
             <option value="card">Tarjeta</option>
@@ -166,3 +249,4 @@ function Sales() {
 }
 
 export default Sales
+
