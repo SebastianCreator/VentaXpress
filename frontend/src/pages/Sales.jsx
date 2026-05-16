@@ -224,7 +224,7 @@ function Sales() {
         <div className="sales-checkout">
           <h2>Resumen</h2>
           <p>Subtotal: <strong>${totals.subtotal}</strong></p>
-          <p>Impuesto (16%): <strong>${totals.tax}</strong></p>
+          <p>Impuesto (%): <strong>${totals.tax}</strong></p>
 
           <input
             type="number"
