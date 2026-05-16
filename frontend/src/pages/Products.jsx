@@ -13,7 +13,9 @@ function Products() {
   const [scanValue, setScanValue] = useState('')
   const [foundProduct, setFoundProduct] = useState(null)
   const [scanError, setScanError] = useState('')
+  const [productsError, setProductsError] = useState('')
   const token = localStorage.getItem('token')
+
 
   const decodeJwtRole = (jwt) => {
     try {
@@ -43,12 +45,19 @@ function Products() {
 
   const fetchProducts = async () => {
     try {
-axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${token}` } })
+      setProductsError('')
+      const response = await axios.get(`${API_BASE_URL}/api/products`, {
+
+        headers: { Authorization: `Bearer ${token}` }
+      })
       setProducts(response.data)
     } catch (error) {
       console.error('Error fetching products:', error)
+      const msg = error?.response?.data?.message || error?.message || 'Error al cargar productos'
+      setProductsError(msg)
     }
   }
+
 
   const lookupByScan = async (value) => {
     const trimmed = (value || '').trim()
@@ -126,7 +135,10 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
         </button>
       )}
 
+      {productsError && <p className="products-error">{productsError}</p>}
+
       {showForm && (
+
         <form onSubmit={handleAddProduct} className="product-form">
           <input
             type="text"
