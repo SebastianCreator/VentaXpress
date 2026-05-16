@@ -78,7 +78,7 @@ function Sales() {
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
-    const tax = subtotal * 0.16
+    const tax = subtotal * 0
     const total = subtotal + tax - discount
 
     return {
