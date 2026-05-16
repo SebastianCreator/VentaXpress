@@ -39,10 +39,10 @@ function Reports() {
     
     doc.setFontSize(12)
     doc.text(`Total de Ventas: ${reportData.totalSales}`, 20, 40)
-    doc.text(`Ingresos Totales: $${reportData.totalRevenue.toFixed(2)}`, 20, 50)
-    doc.text(`Ticket Promedio: $${reportData.averageTicket.toFixed(2)}`, 20, 60)
-    doc.text(`Impuestos: $${reportData.totalTax.toFixed(2)}`, 20, 70)
-    doc.text(`Descuentos: $${reportData.totalDiscount.toFixed(2)}`, 20, 80)
+    doc.text(`Ingresos Totales: $${reportData.totalRevenue.toFixed(0)}`, 20, 50)
+    doc.text(`Ticket Promedio: $${reportData.averageTicket.toFixed(0)}`, 20, 60)
+    doc.text(`Impuestos: $${reportData.totalTax.toFixed(0)}`, 20, 70)
+    doc.text(`Descuentos: $${reportData.totalDiscount.toFixed(0)}`, 20, 80)
 
     doc.save('reporte-ventas.pdf')
   }
@@ -76,26 +76,26 @@ function Reports() {
           </div>
           <div className="report-card">
             <h3>Ingresos Totales</h3>
-            <p className="report-value">${reportData.totalRevenue.toFixed(2)}</p>
+            <p className="report-value">${reportData.totalRevenue.toFixed(0)}</p>
           </div>
           <div className="report-card">
             <h3>Ticket Promedio</h3>
-            <p className="report-value">${reportData.averageTicket.toFixed(2)}</p>
+            <p className="report-value">${reportData.averageTicket.toFixed(0)}</p>
           </div>
           <div className="report-card">
             <h3>Impuestos</h3>
-            <p className="report-value">${reportData.totalTax.toFixed(2)}</p>
+            <p className="report-value">${reportData.totalTax.toFixed(0)}</p>
           </div>
           <div className="report-card">
             <h3>Descuentos</h3>
-            <p className="report-value">${reportData.totalDiscount.toFixed(2)}</p>
+            <p className="report-value">${reportData.totalDiscount.toFixed(0)}</p>
           </div>
 
           <div className="payment-methods">
             <h3>Métodos de Pago</h3>
             <ul>
               {Object.entries(reportData.paymentMethods || {}).map(([method, amount]) => (
-                <li key={method}>{method}: ${amount.toFixed(2)}</li>
+                <li key={method}>{method}: ${amount.toFixed(0)}</li>
               ))}
             </ul>
           </div>

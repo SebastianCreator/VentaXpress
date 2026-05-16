@@ -29,7 +29,7 @@ function Dashboard() {
       setKpis({
         totalSales: summaryRes.data.totalSales,
         totalRevenue: summaryRes.data.totalRevenue,
-        averageTicket: summaryRes.data.averageTicket.toFixed(2),
+        averageTicket: summaryRes.data.averageTicket.toFixed(0),
         lowStockProducts: inventoryRes.data.lowStock
       })
       setTopProducts(topRes.data)
@@ -49,7 +49,7 @@ function Dashboard() {
         </div>
         <div className="kpi-card">
           <h3>Ingresos Totales</h3>
-          <p className="kpi-value">${kpis.totalRevenue.toFixed(2)}</p>
+          <p className="kpi-value">${kpis.totalRevenue.toFixed(0)}</p>
         </div>
         <div className="kpi-card">
           <h3>Ticket Promedio</h3>

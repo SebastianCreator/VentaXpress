@@ -82,9 +82,9 @@ function Sales() {
     const total = subtotal + tax - discount
 
     return {
-      subtotal: subtotal.toFixed(2),
-      tax: tax.toFixed(2),
-      total: total.toFixed(2)
+      subtotal: subtotal.toFixed(0),
+      tax: tax.toFixed(0),
+      total: total.toFixed(0)
     }
   }
 
