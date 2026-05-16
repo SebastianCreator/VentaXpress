@@ -7,6 +7,7 @@ import Sales from './pages/Sales'
 import Products from './pages/Products'
 import Inventory from './pages/Inventory'
 import Reports from './pages/Reports'
+import Register from './pages/Register'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'))
@@ -23,7 +24,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+<Route path="/login" element={<Login onLogin={() => setIsAuthenticated(true)} />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/*"
           element={
