@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "echo 'Backend sin build step (Node/Express).''",
     "test": "jest --detectOpenHandles"
   },
   "keywords": ["POS", "sales", "inventory", "backend"],
@@ -28,3 +29,4 @@
     "supertest": "^6.3.0"
   }
 }
+
