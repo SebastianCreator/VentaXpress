@@ -14,7 +14,22 @@ function Products() {
   const [foundProduct, setFoundProduct] = useState(null)
   const [scanError, setScanError] = useState('')
   const token = localStorage.getItem('token')
-  const userRole = (localStorage.getItem('role') || 'cajero').toLowerCase()
+
+  const decodeJwtRole = (jwt) => {
+    try {
+      if (!jwt) return ''
+      const parts = jwt.split('.')
+      if (parts.length < 2) return ''
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+      return (payload?.role || '').toString().toLowerCase()
+    } catch {
+      return ''
+    }
+  }
+
+  const jwtRole = decodeJwtRole(token)
+
+
 
 
   useEffect(() => {
@@ -56,13 +71,15 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
 
   const handleAddProduct = async (e) => {
     e.preventDefault()
-    if (userRole !== 'admin') {
+    // Validación visual se hace con jwtRole; validación real la hace el backend (admin).
+    if (jwtRole !== 'admin') {
       alert('Solo administradores pueden agregar productos')
       return
     }
 
     try {
       await axios.post(`${API_BASE_URL}/api/products`, formData, { headers: { Authorization: `Bearer ${token}` } })
+
       setFormData({ code: '', barcode: '', name: '', category: '', price: 0, cost: 0, stock: 0, minStock: 5, tax: 0 })
       setShowForm(false)
       fetchProducts()
@@ -97,9 +114,9 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
       </div>
 
 
-      {userRole.includes('admin') && (
-
+      {jwtRole === 'admin' && (
         <button onClick={() => setShowForm(!showForm)} className="btn-add">
+
           {showForm ? 'Cancelar' : 'Nuevo Producto'}
         </button>
       )}
