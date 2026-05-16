@@ -14,7 +14,8 @@ function Products() {
   const [foundProduct, setFoundProduct] = useState(null)
   const [scanError, setScanError] = useState('')
   const token = localStorage.getItem('token')
-  const userRole = localStorage.getItem('role') || 'cajero'
+  const userRole = (localStorage.getItem('role') || 'cajero').toLowerCase()
+
 
   useEffect(() => {
     fetchProducts()
@@ -95,7 +96,9 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
         )}
       </div>
 
+
       {userRole === 'admin' && (
+
         <button onClick={() => setShowForm(!showForm)} className="btn-add">
           {showForm ? 'Cancelar' : 'Nuevo Producto'}
         </button>
