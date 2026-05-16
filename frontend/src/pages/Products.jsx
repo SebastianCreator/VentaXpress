@@ -29,6 +29,11 @@ function Products() {
 
   const jwtRole = decodeJwtRole(token)
 
+  // Para depurar por qué no carga la lista de productos
+  // (puedes borrar esto después de validar)
+  // console.log({ jwtRole, token });
+
+
 
 
 
