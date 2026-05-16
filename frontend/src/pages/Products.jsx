@@ -97,7 +97,7 @@ axios.get(`${API_BASE_URL}/api/products`, { headers: { Authorization: `Bearer ${
       </div>
 
 
-      {userRole === 'admin' && (
+      {userRole.includes('admin') && (
 
         <button onClick={() => setShowForm(!showForm)} className="btn-add">
           {showForm ? 'Cancelar' : 'Nuevo Producto'}
