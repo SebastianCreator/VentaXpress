@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios'
+import Modal from '../components/Modal'
 import '../styles/sales.css'
+
 
 function Sales() {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -14,6 +16,10 @@ function Sales() {
 
   const [scanValue, setScanValue] = useState('')
   const scanInputRef = useRef(null)
+
+  const [stockModalOpen, setStockModalOpen] = useState(false)
+  const [stockModalMessage, setStockModalMessage] = useState('')
+
 
   useEffect(() => {
     fetchProducts()
@@ -82,7 +88,10 @@ function Sales() {
     const existingItem = items.find(i => i.product === product._id)
     const currentQty = existingItem?.quantity ?? 0
     if (product.stock < currentQty + qtyToAdd) {
-      alert(`Stock insuficiente para ${product.name}. Disponible: ${product.stock}, solicitado: ${currentQty + qtyToAdd}`)
+      setStockModalMessage(
+        `Stock insuficiente para ${product.name}. Disponible: ${product.stock}, solicitado: ${currentQty + qtyToAdd}`
+      )
+      setStockModalOpen(true)
       return
     }
 
@@ -267,6 +276,13 @@ function Sales() {
           <button onClick={handleSale} className="btn-sale">Procesar Venta</button>
         </div>
       </div>
+
+      <Modal
+        open={stockModalOpen}
+        title="Aviso de stock"
+        message={stockModalMessage}
+        onClose={() => setStockModalOpen(false)}
+      />
     </div>
   )
 }

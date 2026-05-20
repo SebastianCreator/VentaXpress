@@ -6,8 +6,8 @@ const router = express.Router();
 
 router.get('/', authenticate, async (req, res) => {
   try {
-    const products = await Product.find({});
-    const lowStock = products.filter(p => p.stock <= p.minStock);
+    const products = await Product.find({ isActive: true });
+    const lowStock = products.filter(p => Number(p.stock) <= Number(p.minStock));
     res.json({ total: products.length, lowStock: lowStock.length, products });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -11,6 +11,7 @@ Corregir cálculo de impuestos en UI vs backend y agregar validación real de st
 - [x] Proteger desbordes: si falta stock, responder 400 con mensaje claro.
 
 - [x] (Opcional) Agregar validación también en el frontend para mejorar UX.
+- [x] Cambiar alertas de stock a modal en Sales.
 
 ## Estado
 Listo: impuesto UI (completado) + validación stock (backend + UI)
