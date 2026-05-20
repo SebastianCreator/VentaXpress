@@ -17,12 +17,23 @@ router.post('/', authenticate, async (req, res) => {
       const product = await Product.findById(item.product);
       if (!product) return res.status(404).json({ message: `Producto ${item.product} no encontrado` });
 
-      const itemSubtotal = item.quantity * product.price;
+      const quantity = Number(item.quantity);
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: 'Cantidad inválida' });
+      }
+
+      if (product.stock < quantity) {
+        return res.status(400).json({
+          message: `Stock insuficiente para ${product.name}. Disponible: ${product.stock}, solicitado: ${quantity}`
+        });
+      }
+
+      const itemSubtotal = quantity * product.price;
       const itemTax = itemSubtotal * (product.tax / 100);
-      
+
       updatedItems.push({
         product: item.product,
-        quantity: item.quantity,
+        quantity,
         unitPrice: product.price,
         subtotal: itemSubtotal,
         tax: itemTax
@@ -30,8 +41,8 @@ router.post('/', authenticate, async (req, res) => {
 
       subtotal += itemSubtotal;
       totalTax += itemTax;
-      
-      product.stock -= item.quantity;
+
+      product.stock -= quantity;
       await product.save();
     }
 

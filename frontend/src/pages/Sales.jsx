@@ -40,13 +40,21 @@ function Sales() {
       if (existingIdx >= 0) {
         const next = [...prev]
         const updatedQty = next[existingIdx].quantity + qty
+
+        const subtotal = product.price * updatedQty
+        const tax = subtotal * (Number(product.tax) / 100)
+
         next[existingIdx] = {
           ...next[existingIdx],
           quantity: updatedQty,
-          subtotal: product.price * updatedQty
+          subtotal,
+          tax
         }
         return next
       }
+
+      const subtotal = product.price * qty
+      const tax = subtotal * (Number(product.tax) / 100)
 
       return [
         ...prev,
@@ -55,7 +63,8 @@ function Sales() {
           name: product.name,
           quantity: qty,
           unitPrice: product.price,
-          subtotal: product.price * qty
+          subtotal,
+          tax
         }
       ]
     })
@@ -67,7 +76,17 @@ function Sales() {
     const product = products.find(p => p._id === selectedProduct)
     if (!product) return
 
-    upsertItem(product, parseInt(quantity))
+    const qtyToAdd = parseInt(quantity)
+
+    // UX: bloquear si no hay stock suficiente para la cantidad
+    const existingItem = items.find(i => i.product === product._id)
+    const currentQty = existingItem?.quantity ?? 0
+    if (product.stock < currentQty + qtyToAdd) {
+      alert(`Stock insuficiente para ${product.name}. Disponible: ${product.stock}, solicitado: ${currentQty + qtyToAdd}`)
+      return
+    }
+
+    upsertItem(product, qtyToAdd)
     setSelectedProduct('')
     setQuantity(1)
   }
@@ -78,13 +97,17 @@ function Sales() {
 
   const calculateTotals = () => {
     const subtotal = items.reduce((sum, item) => sum + item.subtotal, 0)
-    const tax = subtotal * 0
-    const total = subtotal + tax - discount
+
+    // tax calculado por item (desde el producto)
+    const tax = items.reduce((sum, item) => sum + (item.tax ?? 0), 0)
+
+    const discountValue = Number(discount) || 0
+    const total = subtotal + tax - discountValue
 
     return {
-      subtotal: subtotal.toFixed(0),
-      tax: tax.toFixed(0),
-      total: total.toFixed(0)
+      subtotal: subtotal.toFixed(2),
+      tax: tax.toFixed(2),
+      total: total.toFixed(2)
     }
   }
 
@@ -224,7 +247,7 @@ function Sales() {
         <div className="sales-checkout">
           <h2>Resumen</h2>
           <p>Subtotal: <strong>${totals.subtotal}</strong></p>
-          <p>Impuesto (%): <strong>${totals.tax}</strong></p>
+          <p>Impuesto: <strong>${totals.tax}</strong></p>
 
           <input
             type="number"
